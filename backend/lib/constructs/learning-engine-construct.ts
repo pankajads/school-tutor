@@ -28,7 +28,7 @@ export class LearningEngineConstruct extends Construct {
         const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
         const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
         const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
-        const { v4: uuidv4 } = require('uuid');
+        const crypto = require('crypto');
 
         const ddbClient = new DynamoDBClient({});
         const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -87,7 +87,7 @@ export class LearningEngineConstruct extends Construct {
             });
           }
 
-          const sessionId = uuidv4();
+          const sessionId = crypto.randomUUID();
           const timestamp = new Date().toISOString();
 
           // Generate adaptive content for each subject
@@ -162,7 +162,7 @@ export class LearningEngineConstruct extends Construct {
             Item: {
               studentId: studentId,
               timestamp: timestamp,
-              sessionId: uuidv4(),
+              sessionId: crypto.randomUUID(),
               subject: subject,
               type: 'content_generated',
               contentType: contentType,
