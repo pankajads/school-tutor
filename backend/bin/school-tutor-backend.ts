@@ -10,7 +10,7 @@ const app = new cdk.App();
 // Environment configuration
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
+  region: process.env.CDK_DEFAULT_REGION || 'ap-southeast-1',
 };
 
 // Main application stack
