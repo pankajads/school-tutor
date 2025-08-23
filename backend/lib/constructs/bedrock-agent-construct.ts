@@ -245,7 +245,7 @@ Please provide an engaging, educational response that:
 
           try {
             const response = await bedrockClient.send(new InvokeModelCommand({
-              modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+              modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
               contentType: 'application/json',
               accept: 'application/json',
               body: JSON.stringify({
@@ -265,7 +265,13 @@ Please provide an engaging, educational response that:
             const responseBody = JSON.parse(new TextDecoder().decode(response.body));
             return responseBody.content[0].text;
           } catch (error) {
-            console.error('Bedrock API error:', error);
+            console.error('Bedrock API error details:', {
+              message: error.message,
+              code: error.code,
+              statusCode: error.$metadata?.httpStatusCode,
+              requestId: error.$metadata?.requestId,
+              stack: error.stack
+            });
             return 'I apologize, but I am having trouble generating a response right now. Please try again in a moment.';
           }
         }
