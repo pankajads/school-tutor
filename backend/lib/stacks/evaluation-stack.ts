@@ -71,7 +71,7 @@ export class EvaluationStack extends cdk.Stack {
         const { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
         const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
         const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
-        const { v4: uuidv4 } = require('uuid');
+        const crypto = require('crypto');
 
         const ddbClient = new DynamoDBClient({});
         const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -145,13 +145,14 @@ Provide a JSON response with:
 
           try {
             const response = await bedrockClient.send(new InvokeModelCommand({
-              modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+              modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
               contentType: 'application/json',
               accept: 'application/json',
               body: JSON.stringify({
                 anthropic_version: 'bedrock-2023-05-31',
                 max_tokens: 1000,
                 temperature: 0.1,
+                system: "You are an expert AI evaluator. Analyze the given content and provide accurate, structured assessments.",
                 messages: [
                   {
                     role: 'user',
@@ -210,13 +211,14 @@ Return JSON:
 
           try {
             const response = await bedrockClient.send(new InvokeModelCommand({
-              modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+              modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
               contentType: 'application/json',
               accept: 'application/json',
               body: JSON.stringify({
                 anthropic_version: 'bedrock-2023-05-31',
                 max_tokens: 1000,
                 temperature: 0.1,
+                system: "You are an expert AI evaluator. Analyze the given content and provide accurate, structured assessments.",
                 messages: [
                   {
                     role: 'user',
@@ -301,13 +303,14 @@ Return JSON:
 
           try {
             const response = await bedrockClient.send(new InvokeModelCommand({
-              modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+              modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
               contentType: 'application/json',
               accept: 'application/json',
               body: JSON.stringify({
                 anthropic_version: 'bedrock-2023-05-31',
                 max_tokens: 1000,
                 temperature: 0.1,
+                system: "You are an expert AI evaluator. Analyze the given content and provide accurate, structured assessments.",
                 messages: [
                   {
                     role: 'user',
@@ -406,13 +409,14 @@ Return JSON:
 
           try {
             const response = await bedrockClient.send(new InvokeModelCommand({
-              modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+              modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
               contentType: 'application/json',
               accept: 'application/json',
               body: JSON.stringify({
                 anthropic_version: 'bedrock-2023-05-31',
                 max_tokens: 1000,
                 temperature: 0.1,
+                system: "You are an expert AI evaluator. Analyze the given content and provide accurate, structured assessments.",
                 messages: [
                   {
                     role: 'user',
@@ -516,7 +520,7 @@ Return JSON:
         }
 
         async function saveEvaluationResult(evaluationType, result) {
-          const evaluationId = uuidv4();
+          const evaluationId = crypto.randomUUID();
           const timestamp = new Date().toISOString();
           
           const evaluationRecord = {
