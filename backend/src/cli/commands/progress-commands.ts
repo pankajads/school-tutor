@@ -1,6 +1,21 @@
 import { DynamoDBClient, QueryCommand, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
+/**
+ * Type definitions for Progress Data Items
+ * These interfaces define the structure of individual progress tracking records
+ */
+interface ProgressDataItem {
+  subject: string;
+  topic?: string;
+  score?: number;
+  timeSpent?: number;
+  status?: string;
+  timestamp?: string;
+  engagementScore?: number;
+  skillsProgress?: number;
+}
+
 export interface ProgressData {
   studentId: string;
   period: string;
@@ -267,7 +282,7 @@ export class ProgressCommands {
     };
   }
 
-  private calculateSubjectMetrics(progressData: any[], subjects?: string[]): Record<string, any> {
+  private calculateSubjectMetrics(progressData: ProgressDataItem[], subjects?: string[]): Record<string, any> {
     const subjectMap: Record<string, any> = {};
     
     // Group data by subject
@@ -276,19 +291,19 @@ export class ProgressCommands {
       if (!acc[subject]) acc[subject] = [];
       acc[subject].push(item);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, ProgressDataItem[]>);
 
     // Calculate metrics for each subject
-    Object.entries(subjectData).forEach(([subject, data]) => {
+    Object.entries(subjectData).forEach(([subject, data]: [string, ProgressDataItem[]]) => {
       if (subjects && !subjects.includes(subject)) return;
 
-      const completedTopics = new Set(data.map(d => d.topic).filter(Boolean)).size;
-      const totalScore = data.reduce((sum, d) => sum + (d.score || 0), 0);
-      const totalTime = data.reduce((sum, d) => sum + (d.timeSpent || 0), 0);
-      const validScores = data.filter(d => d.score > 0);
+      const completedTopics = new Set(data.map((d: ProgressDataItem) => d.topic).filter(Boolean)).size;
+      const totalScore = data.reduce((sum: number, d: ProgressDataItem) => sum + (d.score || 0), 0);
+      const totalTime = data.reduce((sum: number, d: ProgressDataItem) => sum + (d.timeSpent || 0), 0);
+      const validScores = data.filter((d: ProgressDataItem) => (d.score || 0) > 0);
 
       subjectMap[subject] = {
-        completionRate: Math.round((data.filter(d => d.status === 'completed').length / data.length) * 100),
+        completionRate: Math.round((data.filter((d: ProgressDataItem) => d.status === 'completed').length / data.length) * 100),
         topicsCompleted: completedTopics,
         averageScore: validScores.length > 0 ? Math.round(totalScore / validScores.length) : 0,
         timeSpent: Math.round(totalTime),
@@ -592,13 +607,13 @@ export class ProgressCommands {
     return goals;
   }
 
-  private identifyStrengths(data: any[]): string[] {
+  private identifyStrengths(data: ProgressDataItem[]): string[] {
     const topicScores: Record<string, number[]> = {};
     
-    data.forEach(item => {
-      if (item.topic && item.score >= 80) {
+    data.forEach((item: ProgressDataItem) => {
+      if (item.topic && (item.score || 0) >= 80) {
         if (!topicScores[item.topic]) topicScores[item.topic] = [];
-        topicScores[item.topic].push(item.score);
+        topicScores[item.topic].push(item.score || 0);
       }
     });
 
@@ -608,13 +623,13 @@ export class ProgressCommands {
       .slice(0, 3);
   }
 
-  private identifyImprovements(data: any[]): string[] {
+  private identifyImprovements(data: ProgressDataItem[]): string[] {
     const topicScores: Record<string, number[]> = {};
     
-    data.forEach(item => {
-      if (item.topic && item.score < 70) {
+    data.forEach((item: ProgressDataItem) => {
+      if (item.topic && (item.score || 0) < 70) {
         if (!topicScores[item.topic]) topicScores[item.topic] = [];
-        topicScores[item.topic].push(item.score);
+        topicScores[item.topic].push(item.score || 0);
       }
     });
 
@@ -779,5 +794,63 @@ export class ProgressCommands {
     }
     
     console.log('═'.repeat(60));
+  }
+
+  // Static CLI methods
+  static async viewProgress(studentId: string, options: any): Promise<void> {
+    const commands = new ProgressCommands();
+    try {
+      const period = options.period || '30d';
+      const subjects = options.subjects ? options.subjects.split(',').map((s: string) => s.trim()) : undefined;
+      const progressData = await commands.viewProgress(studentId, period, subjects);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(progressData, null, 2));
+      } else {
+        await commands.displayProgress(progressData);
+      }
+    } catch (error) {
+      console.error('Error viewing progress:', error);
+      process.exit(1);
+    }
+  }
+
+  static async getAnalytics(studentId: string, options: any): Promise<void> {
+    const commands = new ProgressCommands();
+    try {
+      const period = options.period || '30d';
+      const analytics = await commands.getAnalytics(studentId, period);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(analytics, null, 2));
+      } else {
+        await commands.displayAnalytics(analytics);
+      }
+    } catch (error) {
+      console.error('Error getting analytics:', error);
+      process.exit(1);
+    }
+  }
+
+  static async generateScorecard(studentId: string, options: any): Promise<void> {
+    const commands = new ProgressCommands();
+    try {
+      const period = options.period || '30d';
+      const scorecard = await commands.generateScorecard(studentId, period);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(scorecard, null, 2));
+      } else {
+        await commands.displayScorecard(scorecard);
+      }
+    } catch (error) {
+      console.error('Error generating scorecard:', error);
+      process.exit(1);
+    }
+  }
+
+  static async updateProgress(options: any): Promise<void> {
+    console.log('Progress update functionality not yet implemented');
+    console.log('This feature will allow manual progress entry and updates');
   }
 }

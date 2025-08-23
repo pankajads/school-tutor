@@ -261,4 +261,92 @@ export class StudentCommands {
       console.log('');
     });
   }
+
+  // Static CLI methods
+  static async createStudent(options: any): Promise<void> {
+    const commands = new StudentCommands();
+    try {
+      await commands.createStudent({
+        name: options.name,
+        grade: parseInt(options.grade),
+        country: options.country,
+        board: options.board,
+        subjects: options.subjects ? options.subjects.split(',').map((s: string) => s.trim()) : undefined,
+        preferences: {
+          learningStyle: options.learningStyle,
+          difficulty: options.difficulty,
+          pace: options.pace
+        }
+      });
+    } catch (error) {
+      console.error('Error creating student:', error);
+      process.exit(1);
+    }
+  }
+
+  static async listStudents(options: any): Promise<void> {
+    const commands = new StudentCommands();
+    try {
+      const data = await commands.listStudents();
+      if (options.format === 'json') {
+        console.log(JSON.stringify(data, null, 2));
+      } else {
+        await commands.displayStudentsList(data);
+      }
+    } catch (error) {
+      console.error('Error listing students:', error);
+      process.exit(1);
+    }
+  }
+
+  static async getStudent(studentId: string, options: any): Promise<void> {
+    const commands = new StudentCommands();
+    try {
+      const student = await commands.getStudent(studentId);
+      if (!student) {
+        console.error(`Student ${studentId} not found`);
+        process.exit(1);
+      }
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(student, null, 2));
+      } else {
+        await commands.displayStudentInfo(student);
+      }
+    } catch (error) {
+      console.error('Error getting student:', error);
+      process.exit(1);
+    }
+  }
+
+  static async updateStudent(studentId: string, options: any): Promise<void> {
+    const commands = new StudentCommands();
+    try {
+      await commands.updateStudent(studentId, {
+        name: options.name,
+        grade: options.grade ? parseInt(options.grade) : undefined,
+        country: options.country,
+        board: options.board,
+        subjects: options.subjects ? options.subjects.split(',').map((s: string) => s.trim()) : undefined,
+        preferences: {
+          learningStyle: options.learningStyle,
+          difficulty: options.difficulty,
+          pace: options.pace
+        }
+      });
+    } catch (error) {
+      console.error('Error updating student:', error);
+      process.exit(1);
+    }
+  }
+
+  static async deleteStudent(studentId: string, options: any): Promise<void> {
+    const commands = new StudentCommands();
+    try {
+      await commands.deleteStudent(studentId);
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      process.exit(1);
+    }
+  }
 }

@@ -573,4 +573,77 @@ export class SystemCommands {
     
     console.log('─'.repeat(60));
   }
+
+  // Static CLI methods
+  static async checkStatus(options: any): Promise<void> {
+    const commands = new SystemCommands();
+    try {
+      const status = await commands.getSystemStatus(options.detailed || false);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(status, null, 2));
+      } else if (options.detailed) {
+        await commands.displayDetailedStatus(status);
+      } else {
+        await commands.displaySystemStatus(status);
+      }
+    } catch (error) {
+      console.error('Error checking system status:', error);
+      process.exit(1);
+    }
+  }
+
+  static async deploy(options: any): Promise<void> {
+    console.log('Deployment functionality not yet implemented');
+    console.log('This feature will handle CDK deployment and updates');
+    console.log('Use CDK commands directly for now:');
+    console.log('  cd cdk && npx cdk deploy');
+  }
+
+  static async viewLogs(options: any): Promise<void> {
+    console.log('Log viewing functionality not yet implemented');
+    console.log('This feature will stream CloudWatch logs');
+    console.log('Access logs through AWS Console for now');
+    if (options.service) {
+      console.log(`Would show logs for service: ${options.service}`);
+    }
+  }
+
+  static async backupData(options: any): Promise<void> {
+    console.log('Data backup functionality not yet implemented');
+    console.log('This feature will backup DynamoDB tables and S3 data');
+    console.log('Use AWS Console for manual backups for now');
+  }
+
+  static async restoreData(options: any): Promise<void> {
+    console.log('Data restore functionality not yet implemented');
+    console.log('This feature will restore from backups');
+    console.log('Use AWS Console for manual restore for now');
+    if (options.backup) {
+      console.log(`Would restore from backup: ${options.backup}`);
+    }
+  }
+
+  static async manageConfig(options: any): Promise<void> {
+    const commands = new SystemCommands();
+    try {
+      if (options.get) {
+        const config = await commands.getConfiguration();
+        if (options.format === 'json') {
+          console.log(JSON.stringify(config, null, 2));
+        } else {
+          await commands.displayConfiguration(config);
+        }
+      } else if (options.update) {
+        console.log('Configuration update functionality not yet implemented');
+        console.log('This feature will allow dynamic configuration updates');
+      } else {
+        console.log('Configuration management');
+        console.log('Available options: --get, --update');
+      }
+    } catch (error) {
+      console.error('Error managing configuration:', error);
+      process.exit(1);
+    }
+  }
 }
