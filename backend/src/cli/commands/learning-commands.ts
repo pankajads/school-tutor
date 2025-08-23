@@ -548,4 +548,59 @@ Format your response as JSON:
     
     console.log('─'.repeat(60));
   }
+
+  // Static CLI methods
+  static async startSession(options: any): Promise<void> {
+    const commands = new LearningCommands();
+    try {
+      const duration = parseInt(options.duration) || 60;
+      const subjects = options.subjects ? options.subjects.split(',').map((s: string) => s.trim()) : ['Mathematics'];
+      
+      const session = await commands.startSession(options.studentId, subjects, duration);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(session, null, 2));
+      } else {
+        await commands.displaySessionInfo(session);
+      }
+    } catch (error) {
+      console.error('Error starting session:', error);
+      process.exit(1);
+    }
+  }
+
+  static async generateContent(options: any): Promise<void> {
+    const commands = new LearningCommands();
+    try {
+      const contentRequest: ContentRequest = {
+        studentId: options.studentId,
+        subject: options.subject,
+        topic: options.topic,
+        contentType: options.type || 'lesson',
+        difficulty: options.difficulty,
+        context: options.context
+      };
+      
+      const content = await commands.generateContent(contentRequest);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(content, null, 2));
+      } else {
+        await commands.displayContent(content);
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+      process.exit(1);
+    }
+  }
+
+  static async startChat(options: any): Promise<void> {
+    console.log('Interactive chat functionality not yet implemented');
+    console.log('This feature will provide real-time AI tutoring chat interface');
+    console.log(`Would start chat for student: ${options.studentId}`);
+    if (options.subject) {
+      console.log(`Subject: ${options.subject}`);
+    }
+    console.log('Use "learning generate" for content generation instead');
+  }
 }

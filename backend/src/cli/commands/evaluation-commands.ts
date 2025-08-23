@@ -168,11 +168,11 @@ export class EvaluationCommands {
         timestamp: new Date().toISOString(),
         systemMetrics,
         frameworkMetrics,
-        recentEvaluations: recentEvaluations.map(eval => ({
-          evaluationId: eval.evaluationId,
-          timestamp: eval.completedAt || eval.startTime,
-          score: eval.summary?.overallScore || 0,
-          status: eval.status
+        recentEvaluations: recentEvaluations.map(evaluation => ({
+          evaluationId: evaluation.evaluationId,
+          timestamp: evaluation.completedAt || evaluation.startTime,
+          score: evaluation.summary?.overallScore || 0,
+          status: evaluation.status
         }))
       };
 
@@ -580,9 +580,9 @@ export class EvaluationCommands {
     
     if (metrics.recentEvaluations.length > 0) {
       console.log('\n📋 Recent Evaluations:');
-      metrics.recentEvaluations.slice(0, 5).forEach((eval, index) => {
-        console.log(`   ${index + 1}. ${eval.evaluationId.substring(0, 8)}... - ${Math.round(eval.score * 100)}% (${eval.status})`);
-        console.log(`      ${new Date(eval.timestamp).toLocaleDateString()}`);
+      metrics.recentEvaluations.slice(0, 5).forEach((evaluation, index) => {
+        console.log(`   ${index + 1}. ${evaluation.evaluationId.substring(0, 8)}... - ${Math.round(evaluation.score * 100)}% (${evaluation.status})`);
+        console.log(`      ${new Date(evaluation.timestamp).toLocaleDateString()}`);
       });
     }
     
@@ -608,5 +608,63 @@ export class EvaluationCommands {
     console.log('   • Set up alerts for critical threshold breaches');
     
     console.log('═'.repeat(60));
+  }
+
+  // Static CLI methods
+  static async runEvaluation(options: any): Promise<void> {
+    const commands = new EvaluationCommands();
+    try {
+      const request: EvaluationRequest = {
+        type: options.type || 'comprehensive',
+        students: options.students ? options.students.split(',').map((s: string) => s.trim()) : undefined,
+        frameworks: options.frameworks ? options.frameworks.split(',').map((f: string) => f.trim()) : ['all'],
+        metrics: options.metrics ? options.metrics.split(',').map((m: string) => m.trim()) : ['accuracy', 'relevance', 'helpfulness'],
+        timeframe: options.timeframe,
+        customConfig: options.config ? JSON.parse(options.config) : undefined
+      };
+      
+      const result = await commands.runEvaluation(request);
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        await commands.displayEvaluationResult(result);
+      }
+    } catch (error) {
+      console.error('Error running evaluation:', error);
+      process.exit(1);
+    }
+  }
+
+  static async showMetrics(options: any): Promise<void> {
+    const commands = new EvaluationCommands();
+    try {
+      const metrics = await commands.getEvaluationMetrics();
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(metrics, null, 2));
+      } else {
+        await commands.displayEvaluationMetrics(metrics);
+      }
+    } catch (error) {
+      console.error('Error getting metrics:', error);
+      process.exit(1);
+    }
+  }
+
+  static async launchDashboard(options: any): Promise<void> {
+    const commands = new EvaluationCommands();
+    try {
+      const dashboard = await commands.launchDashboard();
+      
+      if (options.format === 'json') {
+        console.log(JSON.stringify(dashboard, null, 2));
+      } else {
+        await commands.displayDashboardInfo(dashboard);
+      }
+    } catch (error) {
+      console.error('Error launching dashboard:', error);
+      process.exit(1);
+    }
   }
 }
