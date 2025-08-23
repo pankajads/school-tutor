@@ -1,0 +1,46 @@
+{
+  "name": "school-tutor-agent",
+  "version": "1.0.0",
+  "description": "AI-powered class tutor agent for 8th and 4th standard students with adaptive learning and progress tracking",
+  "main": "index.js",
+  "scripts": {
+    "build": "pnpm run clean && pnpm run build:backend && pnpm run build:frontend",
+    "build:backend": "cd backend && pnpm run build",
+    "build:frontend": "cd frontend && pnpm run build",
+    "clean": "rm -rf dist/* && touch dist/.gitkeep",
+    "clean:backend": "rm -rf dist/backend",
+    "clean:frontend": "rm -rf dist/frontend",
+    "clean:evaluation": "rm -rf dist/evaluation",
+    "deploy": "cd backend && pnpm run deploy",
+    "start:backend": "cd backend && pnpm start",
+    "start:frontend": "cd frontend && pnpm start",
+    "dev": "concurrently \"pnpm run start:backend\" \"pnpm run start:frontend\"",
+    "test": "pnpm run test:backend && pnpm run test:frontend",
+    "test:backend": "cd backend && pnpm test",
+    "test:frontend": "cd frontend && pnpm test",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "ai-tutor",
+    "bedrock",
+    "aws",
+    "education",
+    "adaptive-learning",
+    "progress-tracking"
+  ],
+  "author": "Pankaj Negi",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "evaluation"
+  ]
+}
