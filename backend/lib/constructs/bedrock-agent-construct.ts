@@ -47,10 +47,11 @@ export class BedrockAgentConstruct extends Construct {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
-        const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
         const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-        const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
-        const { v4: uuidv4 } = require('uuid');
+        const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+        const { BedrockAgentRuntimeClient, InvokeAgentCommand } = require('@aws-sdk/client-bedrock-agent-runtime');
+        const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
+        const crypto = require('crypto');
 
         const bedrockClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
         const ddbClient = new DynamoDBClient({});
@@ -104,7 +105,7 @@ export class BedrockAgentConstruct extends Construct {
             response: aiResponse,
             studentName: student.studentName,
             subject: subject,
-            sessionId: sessionId || uuidv4(),
+            sessionId: sessionId || crypto.randomUUID(),
             timestamp: new Date().toISOString()
           });
         }
@@ -133,7 +134,7 @@ export class BedrockAgentConstruct extends Construct {
         }
 
         async function startLearningSession(student, subject, data) {
-          const sessionId = uuidv4();
+          const sessionId = crypto.randomUUID();
           const timestamp = new Date().toISOString();
 
           // Get curriculum-compliant content prompt
@@ -193,7 +194,7 @@ export class BedrockAgentConstruct extends Construct {
             Item: {
               studentId: student.studentId,
               timestamp: timestamp,
-              sessionId: uuidv4(),
+              sessionId: crypto.randomUUID(),
               subject: subject,
               type: 'assessment',
               questions: questions,
@@ -299,7 +300,7 @@ Please provide an engaging, educational response that:
             Item: {
               studentId: studentId,
               timestamp: timestamp,
-              sessionId: sessionId || uuidv4(),
+              sessionId: sessionId || crypto.randomUUID(),
               subject: subject,
               type: 'chat_interaction',
               userMessage: message,

@@ -25,7 +25,7 @@ export class ProgressTrackingConstruct extends Construct {
       code: lambda.Code.fromInline(`
         const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
         const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-        const { v4: uuidv4 } = require('uuid');
+        const crypto = require('crypto');
 
         const ddbClient = new DynamoDBClient({});
         const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -173,7 +173,7 @@ export class ProgressTrackingConstruct extends Construct {
           const progressEntry = {
             studentId: studentId,
             timestamp: timestamp,
-            sessionId: sessionId || uuidv4(),
+            sessionId: sessionId || crypto.randomUUID(),
             subject: subject,
             type: 'progress_update',
             activity: activity,
