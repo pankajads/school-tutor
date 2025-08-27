@@ -62,7 +62,10 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-lib/
+# Ignore Python lib directories but not CDK lib directories
+/lib/
+*/lib/
+!backend/lib/
 lib64/
 parts/
 sdist/
@@ -143,6 +146,12 @@ amplifytools.xcconfig
 # Temporary files
 *.tmp
 *.temp
+
+# Test data and evaluation artifacts
+backend/test-data/
+test-data/
+**/test-*.json
+**/response-*.json
 
 # Database files
 *.db

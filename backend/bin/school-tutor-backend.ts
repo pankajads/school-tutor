@@ -1,45 +1,35 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib';
-import 'source-map-support/register';
-import { SchoolTutorStack } from '../lib/stacks/school-tutor-stack';
-import { EvaluationStack } from '../lib/stacks/evaluation-stack';
-import { MonitoringStack } from '../lib/stacks/monitoring-stack';
+import * as cdk from "aws-cdk-lib";
+import "source-map-support/register";
+import { CoreResourcesStack } from "../lib/stacks/core-resources-stack";
+import { AiServiceStack } from "../lib/stacks/ai-service-stack";
 
 const app = new cdk.App();
 
 // Environment configuration
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION || 'ap-southeast-1',
+  region: process.env.CDK_DEFAULT_REGION || "ap-southeast-1",
 };
 
-// Main application stack
-const schoolTutorStack = new SchoolTutorStack(app, 'SchoolTutorStack', {
+// Core resources stack - just databases and S3
+const coreResourcesStack = new CoreResourcesStack(app, "CoreResourcesStack", {
   env,
-  description: 'School Tutor Agent - Main application stack with Bedrock agents',
+  description: "School Tutor Agent - Core resources (DB, S3)",
 });
 
-// Evaluation and metrics stack
-const evaluationStack = new EvaluationStack(app, 'EvaluationStack', {
+// Complete AI services stack (all services with clean Lambda code separation)
+const aiServiceStack = new AiServiceStack(app, "AiServiceStack", {
+  coreResourcesStack: coreResourcesStack,
   env,
-  description: 'School Tutor Agent - Evaluation and metrics stack',
-  tutorStack: schoolTutorStack,
+  description:
+    "School Tutor Agent - Complete AI services with external Lambda functions",
 });
 
-// Monitoring and dashboard stack
-const monitoringStack = new MonitoringStack(app, 'MonitoringStack', {
-  env,
-  description: 'School Tutor Agent - Monitoring and dashboard stack',
-  tutorStack: schoolTutorStack,
-  evaluationStack: evaluationStack,
-});
-
-// Add stack dependencies
-evaluationStack.addDependency(schoolTutorStack);
-monitoringStack.addDependency(schoolTutorStack);
-monitoringStack.addDependency(evaluationStack);
+// Dependencies
+aiServiceStack.addDependency(coreResourcesStack);
 
 // Add tags
-cdk.Tags.of(app).add('Project', 'SchoolTutorAgent');
-cdk.Tags.of(app).add('Environment', process.env.ENVIRONMENT || 'dev');
-cdk.Tags.of(app).add('Owner', 'PankajNegi');
+cdk.Tags.of(app).add("Project", "SchoolTutorAgent");
+cdk.Tags.of(app).add("Environment", process.env.ENVIRONMENT || "dev");
+cdk.Tags.of(app).add("Owner", "PankajNegi");

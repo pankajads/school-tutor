@@ -1,0 +1,14 @@
+{
+  "name": "ai-judge-lambda",
+  "version": "1.0.0",
+  "description": "AI Judge Lambda Function for educational content evaluation using AWS Bedrock Claude-3-Sonnet",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.470.0",
+    "@aws-sdk/client-dynamodb": "^3.470.0",
+    "@aws-sdk/lib-dynamodb": "^3.470.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

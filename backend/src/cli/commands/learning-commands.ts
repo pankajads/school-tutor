@@ -1,14 +1,26 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
-import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  GetItemCommand,
+  QueryCommand,
+} from "@aws-sdk/client-dynamodb";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { v4 as uuidv4 } from "uuid";
 
 export interface LearningSession {
   sessionId: string;
   studentId: string;
   subjects: string[];
-  status: 'active' | 'completed' | 'paused';
+  status: "active" | "completed" | "paused";
   startTime: string;
   endTime?: string;
   plannedDuration: number;
@@ -24,7 +36,7 @@ export interface ContentRequest {
   studentId: string;
   subject: string;
   topic: string;
-  contentType: 'lesson' | 'exercise' | 'quiz' | 'explanation';
+  contentType: "lesson" | "exercise" | "quiz" | "explanation";
   difficulty?: string;
   context?: string;
 }
@@ -84,43 +96,54 @@ export class LearningCommands {
   private contentBucket: string;
 
   constructor() {
-    const region = process.env.AWS_REGION || 'us-east-1';
+    const region = process.env.AWS_REGION || "us-east-1";
     this.dynamodb = new DynamoDBClient({ region });
     this.bedrock = new BedrockRuntimeClient({ region });
     this.s3 = new S3Client({ region });
-    
-    this.sessionsTable = process.env.SESSIONS_TABLE_NAME || 'school-tutor-sessions';
-    this.progressTable = process.env.PROGRESS_TABLE_NAME || 'school-tutor-progress';
-    this.contentBucket = process.env.CONTENT_BUCKET_NAME || 'school-tutor-content';
+
+    this.sessionsTable =
+      process.env.SESSIONS_TABLE_NAME || "school-tutor-sessions";
+    this.progressTable =
+      process.env.PROGRESS_TABLE_NAME || "school-tutor-progress";
+    this.contentBucket =
+      process.env.CONTENT_BUCKET_NAME || "school-tutor-content";
   }
 
-  async startSession(studentId: string, subjects: string[], duration: number = 60): Promise<LearningSession> {
+  async startSession(
+    studentId: string,
+    subjects: string[],
+    duration: number = 60,
+  ): Promise<LearningSession> {
     const sessionId = `session-${uuidv4()}`;
     const now = new Date().toISOString();
-    const plannedEndTime = new Date(Date.now() + duration * 60 * 1000).toISOString();
+    const plannedEndTime = new Date(
+      Date.now() + duration * 60 * 1000,
+    ).toISOString();
 
     // Ensure exactly 2 subjects for daily requirement
     if (subjects.length !== 2) {
-      throw new Error('Daily learning must cover exactly 2 subjects as per curriculum requirements');
+      throw new Error(
+        "Daily learning must cover exactly 2 subjects as per curriculum requirements",
+      );
     }
 
     const session: LearningSession = {
       sessionId,
       studentId,
       subjects,
-      status: 'active',
+      status: "active",
       startTime: now,
       plannedDuration: duration,
       currentSubject: subjects[0], // Start with first subject
       progress: {
         completedTopics: [],
-        timeSpent: 0
-      }
+        timeSpent: 0,
+      },
     };
 
     const command = new PutItemCommand({
       TableName: this.sessionsTable,
-      Item: marshall(session)
+      Item: marshall(session),
     });
 
     try {
@@ -128,13 +151,13 @@ export class LearningCommands {
       console.log(`🚀 Learning session started successfully!`);
       console.log(`📚 Session ID: ${sessionId}`);
       console.log(`👤 Student: ${studentId}`);
-      console.log(`📖 Subjects: ${subjects.join(', ')}`);
+      console.log(`📖 Subjects: ${subjects.join(", ")}`);
       console.log(`⏱️  Duration: ${duration} minutes`);
       console.log(`🎯 Current Subject: ${session.currentSubject}`);
-      
+
       return session;
     } catch (error) {
-      console.error('❌ Failed to start learning session:', error);
+      console.error("❌ Failed to start learning session:", error);
       throw error;
     }
   }
@@ -142,13 +165,13 @@ export class LearningCommands {
   async generateContent(request: ContentRequest): Promise<GeneratedContent> {
     // First, get student profile to personalize content
     const studentProfile = await this.getStudentProfile(request.studentId);
-    
+
     const prompt = this.buildContentPrompt(request, studentProfile);
-    
+
     try {
       const bedrockResponse = await this.callBedrock(prompt);
       const content = this.parseContentResponse(bedrockResponse);
-      
+
       const generatedContent: GeneratedContent = {
         contentId: `content-${uuidv4()}`,
         subject: request.subject,
@@ -156,20 +179,25 @@ export class LearningCommands {
         contentType: request.contentType,
         content,
         metadata: {
-          difficulty: request.difficulty || studentProfile?.preferences?.difficulty || 'medium',
+          difficulty:
+            request.difficulty ||
+            studentProfile?.preferences?.difficulty ||
+            "medium",
           estimatedTime: this.estimateTime(request.contentType, content),
-          learningObjectives: this.extractLearningObjectives(content)
+          learningObjectives: this.extractLearningObjectives(content),
         },
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
 
       // Store content in S3 for future reference
       await this.storeContent(generatedContent);
-      
-      console.log(`✅ Content generated successfully for ${request.subject} - ${request.topic}`);
+
+      console.log(
+        `✅ Content generated successfully for ${request.subject} - ${request.topic}`,
+      );
       return generatedContent;
     } catch (error) {
-      console.error('❌ Failed to generate content:', error);
+      console.error("❌ Failed to generate content:", error);
       throw error;
     }
   }
@@ -177,29 +205,33 @@ export class LearningCommands {
   async chatWithTutor(chatMessage: ChatMessage): Promise<ChatResponse> {
     // Get student profile for personalization
     const studentProfile = await this.getStudentProfile(chatMessage.studentId);
-    
+
     // Get recent conversation history if session provided
-    const conversationHistory = chatMessage.sessionId 
-      ? await this.getConversationHistory(chatMessage.sessionId) 
+    const conversationHistory = chatMessage.sessionId
+      ? await this.getConversationHistory(chatMessage.sessionId)
       : [];
 
-    const prompt = this.buildChatPrompt(chatMessage, studentProfile, conversationHistory);
-    
+    const prompt = this.buildChatPrompt(
+      chatMessage,
+      studentProfile,
+      conversationHistory,
+    );
+
     try {
       const bedrockResponse = await this.callBedrock(prompt);
       const chatResponse = this.parseChatResponse(bedrockResponse);
-      
+
       // Store interaction for progress tracking
       await this.recordInteraction(chatMessage, chatResponse);
-      
+
       console.log(`💬 Tutor: ${chatResponse.response}`);
       if (chatResponse.suggestions.length > 0) {
-        console.log(`💡 Suggestions: ${chatResponse.suggestions.join(', ')}`);
+        console.log(`💡 Suggestions: ${chatResponse.suggestions.join(", ")}`);
       }
-      
+
       return chatResponse;
     } catch (error) {
-      console.error('❌ Failed to process chat message:', error);
+      console.error("❌ Failed to process chat message:", error);
       throw error;
     }
   }
@@ -211,19 +243,22 @@ export class LearningCommands {
       throw new Error(`Session ${sessionId} not found`);
     }
 
-    if (session.status !== 'active') {
+    if (session.status !== "active") {
       throw new Error(`Session ${sessionId} is not active`);
     }
 
     // Update session status
     const endTime = new Date().toISOString();
-    const actualDuration = Math.round((new Date(endTime).getTime() - new Date(session.startTime).getTime()) / 60000);
+    const actualDuration = Math.round(
+      (new Date(endTime).getTime() - new Date(session.startTime).getTime()) /
+        60000,
+    );
 
     // TODO: Update session with end time and final progress
     console.log(`🏁 Learning session ended successfully!`);
     console.log(`📚 Session ID: ${sessionId}`);
     console.log(`⏱️  Actual Duration: ${actualDuration} minutes`);
-    console.log(`✅ Subjects Covered: ${session.subjects.join(', ')}`);
+    console.log(`✅ Subjects Covered: ${session.subjects.join(", ")}`);
   }
 
   private async getStudentProfile(studentId: string): Promise<any> {
@@ -232,32 +267,35 @@ export class LearningCommands {
     return {
       studentId,
       grade: 8,
-      country: 'United States',
-      board: 'Common Core',
+      country: "United States",
+      board: "Common Core",
       preferences: {
-        learningStyle: 'visual',
-        difficulty: 'medium',
-        pace: 'moderate'
-      }
+        learningStyle: "visual",
+        difficulty: "medium",
+        pace: "moderate",
+      },
     };
   }
 
   private async getSession(sessionId: string): Promise<LearningSession | null> {
     const command = new GetItemCommand({
       TableName: this.sessionsTable,
-      Key: marshall({ sessionId })
+      Key: marshall({ sessionId }),
     });
 
     try {
       const result = await this.dynamodb.send(command);
-      return result.Item ? unmarshall(result.Item) as LearningSession : null;
+      return result.Item ? (unmarshall(result.Item) as LearningSession) : null;
     } catch (error) {
-      console.error('Failed to get session:', error);
+      console.error("Failed to get session:", error);
       return null;
     }
   }
 
-  private buildContentPrompt(request: ContentRequest, studentProfile: any): string {
+  private buildContentPrompt(
+    request: ContentRequest,
+    studentProfile: any,
+  ): string {
     return `You are an expert AI tutor. Generate educational content for a ${studentProfile.grade}th grade student studying in ${studentProfile.country} following the ${studentProfile.board} curriculum.
 
 Student Profile:
@@ -271,7 +309,7 @@ Content Request:
 - Subject: ${request.subject}
 - Topic: ${request.topic}
 - Content Type: ${request.contentType}
-- Difficulty: ${request.difficulty || 'medium'}
+- Difficulty: ${request.difficulty || "medium"}
 
 Requirements:
 1. Make content age-appropriate and engaging
@@ -297,10 +335,15 @@ Format the response as JSON with the following structure:
 }`;
   }
 
-  private buildChatPrompt(message: ChatMessage, studentProfile: any, history: any[]): string {
-    const historyText = history.length > 0 
-      ? `\nConversation History:\n${history.map(h => `${h.role}: ${h.message}`).join('\n')}`
-      : '';
+  private buildChatPrompt(
+    message: ChatMessage,
+    studentProfile: any,
+    history: any[],
+  ): string {
+    const historyText =
+      history.length > 0
+        ? `\nConversation History:\n${history.map((h) => `${h.role}: ${h.message}`).join("\n")}`
+        : "";
 
     return `You are a friendly, patient, and knowledgeable AI tutor helping a ${studentProfile.grade}th grade student. 
 
@@ -312,8 +355,8 @@ Student Profile:
 
 Current Context:
 - Subject: ${message.context.subject}
-- Topic: ${message.context.topic || 'General'}
-- Current Problem: ${message.context.currentProblem || 'None'}
+- Topic: ${message.context.topic || "General"}
+- Current Problem: ${message.context.currentProblem || "None"}
 
 ${historyText}
 
@@ -347,23 +390,23 @@ Format your response as JSON:
   }
 
   private async callBedrock(prompt: string): Promise<string> {
-    const modelId = 'anthropic.claude-3-sonnet-20240229-v1:0';
-    
+    const modelId = "anthropic.claude-3-sonnet-20240229-v1:0";
+
     const payload = {
       anthropic_version: "bedrock-2023-05-31",
       max_tokens: 2000,
       messages: [
         {
           role: "user",
-          content: prompt
-        }
-      ]
+          content: prompt,
+        },
+      ],
     };
 
     const command = new InvokeModelCommand({
       modelId,
       body: JSON.stringify(payload),
-      contentType: 'application/json'
+      contentType: "application/json",
     });
 
     try {
@@ -371,8 +414,8 @@ Format your response as JSON:
       const responseBody = JSON.parse(new TextDecoder().decode(response.body));
       return responseBody.content[0].text;
     } catch (error) {
-      console.error('Bedrock API call failed:', error);
-      throw new Error('Failed to generate AI response');
+      console.error("Bedrock API call failed:", error);
+      throw new Error("Failed to generate AI response");
     }
   }
 
@@ -386,7 +429,7 @@ Format your response as JSON:
         explanation: response,
         examples: [],
         exercises: [],
-        resources: []
+        resources: [],
       };
     }
   }
@@ -402,31 +445,34 @@ Format your response as JSON:
         hints: [],
         engagement: {
           score: 7,
-          factors: ['responded']
-        }
+          factors: ["responded"],
+        },
       };
     }
   }
 
   private async storeContent(content: GeneratedContent): Promise<void> {
     const key = `content/${content.contentId}.json`;
-    
+
     const command = new PutObjectCommand({
       Bucket: this.contentBucket,
       Key: key,
       Body: JSON.stringify(content, null, 2),
-      ContentType: 'application/json'
+      ContentType: "application/json",
     });
 
     try {
       await this.s3.send(command);
     } catch (error) {
-      console.error('Failed to store content in S3:', error);
+      console.error("Failed to store content in S3:", error);
       // Don't throw error - content generation succeeded even if storage failed
     }
   }
 
-  private async recordInteraction(message: ChatMessage, response: ChatResponse): Promise<void> {
+  private async recordInteraction(
+    message: ChatMessage,
+    response: ChatResponse,
+  ): Promise<void> {
     const interactionId = `interaction-${uuidv4()}`;
     const timestamp = new Date().toISOString();
 
@@ -440,18 +486,18 @@ Format your response as JSON:
       studentMessage: message.message,
       tutorResponse: response.response,
       engagementScore: response.engagement.score,
-      engagementFactors: response.engagement.factors
+      engagementFactors: response.engagement.factors,
     };
 
     const command = new PutItemCommand({
       TableName: this.progressTable,
-      Item: marshall(interaction)
+      Item: marshall(interaction),
     });
 
     try {
       await this.dynamodb.send(command);
     } catch (error) {
-      console.error('Failed to record interaction:', error);
+      console.error("Failed to record interaction:", error);
       // Don't throw error - chat succeeded even if logging failed
     }
   }
@@ -465,10 +511,10 @@ Format your response as JSON:
   private estimateTime(contentType: string, content: any): number {
     // Estimate reading/completion time based on content type and length
     const baseTime = {
-      'lesson': 15,
-      'exercise': 10,
-      'quiz': 5,
-      'explanation': 8
+      lesson: 15,
+      exercise: 10,
+      quiz: 5,
+      explanation: 8,
     };
 
     return baseTime[contentType as keyof typeof baseTime] || 10;
@@ -478,75 +524,79 @@ Format your response as JSON:
     // Extract or generate learning objectives from content
     // This would be more sophisticated in a real implementation
     return [
-      'Understand the core concepts',
-      'Apply knowledge to solve problems',
-      'Connect to real-world applications'
+      "Understand the core concepts",
+      "Apply knowledge to solve problems",
+      "Connect to real-world applications",
     ];
   }
 
   async displaySessionInfo(session: LearningSession): Promise<void> {
-    console.log('\n🎯 Learning Session Information:');
-    console.log('─'.repeat(50));
+    console.log("\n🎯 Learning Session Information:");
+    console.log("─".repeat(50));
     console.log(`📚 Session ID: ${session.sessionId}`);
     console.log(`👤 Student: ${session.studentId}`);
-    console.log(`📖 Subjects: ${session.subjects.join(', ')}`);
+    console.log(`📖 Subjects: ${session.subjects.join(", ")}`);
     console.log(`📊 Status: ${session.status}`);
     console.log(`🕐 Started: ${new Date(session.startTime).toLocaleString()}`);
     console.log(`⏱️  Planned Duration: ${session.plannedDuration} minutes`);
     console.log(`🎯 Current Subject: ${session.currentSubject}`);
-    
+
     if (session.progress.completedTopics.length > 0) {
-      console.log(`✅ Completed Topics: ${session.progress.completedTopics.join(', ')}`);
+      console.log(
+        `✅ Completed Topics: ${session.progress.completedTopics.join(", ")}`,
+      );
     }
-    
+
     if (session.progress.currentTopic) {
       console.log(`📘 Current Topic: ${session.progress.currentTopic}`);
     }
-    
+
     console.log(`⏰ Time Spent: ${session.progress.timeSpent} minutes`);
-    console.log('─'.repeat(50));
+    console.log("─".repeat(50));
   }
 
   async displayContent(content: GeneratedContent): Promise<void> {
-    console.log('\n📚 Generated Content:');
-    console.log('─'.repeat(60));
+    console.log("\n📚 Generated Content:");
+    console.log("─".repeat(60));
     console.log(`📖 Subject: ${content.subject}`);
     console.log(`📘 Topic: ${content.topic}`);
     console.log(`📋 Type: ${content.contentType}`);
-    console.log(`⏱️  Estimated Time: ${content.metadata.estimatedTime} minutes`);
+    console.log(
+      `⏱️  Estimated Time: ${content.metadata.estimatedTime} minutes`,
+    );
     console.log(`📊 Difficulty: ${content.metadata.difficulty}`);
-    console.log('─'.repeat(60));
-    
+    console.log("─".repeat(60));
+
     console.log(`\n📝 ${content.content.title}`);
-    console.log('\n' + content.content.explanation);
-    
+    console.log("\n" + content.content.explanation);
+
     if (content.content.examples && content.content.examples.length > 0) {
-      console.log('\n💡 Examples:');
+      console.log("\n💡 Examples:");
       content.content.examples.forEach((example, index) => {
         console.log(`${index + 1}. ${example}`);
       });
     }
-    
+
     if (content.content.exercises && content.content.exercises.length > 0) {
-      console.log('\n📝 Practice Exercises:');
+      console.log("\n📝 Practice Exercises:");
       content.content.exercises.forEach((exercise, index) => {
         console.log(`${index + 1}. ${exercise}`);
       });
     }
-    
+
     if (content.content.resources && content.content.resources.length > 0) {
-      console.log('\n📚 Additional Resources:');
+      console.log("\n📚 Additional Resources:");
       content.content.resources.forEach((resource, index) => {
         console.log(`${index + 1}. ${resource}`);
       });
     }
-    
-    console.log('\n🎯 Learning Objectives:');
+
+    console.log("\n🎯 Learning Objectives:");
     content.metadata.learningObjectives.forEach((objective, index) => {
       console.log(`${index + 1}. ${objective}`);
     });
-    
-    console.log('─'.repeat(60));
+
+    console.log("─".repeat(60));
   }
 
   // Static CLI methods
@@ -554,17 +604,23 @@ Format your response as JSON:
     const commands = new LearningCommands();
     try {
       const duration = parseInt(options.duration) || 60;
-      const subjects = options.subjects ? options.subjects.split(',').map((s: string) => s.trim()) : ['Mathematics'];
-      
-      const session = await commands.startSession(options.studentId, subjects, duration);
-      
-      if (options.format === 'json') {
+      const subjects = options.subjects
+        ? options.subjects.split(",").map((s: string) => s.trim())
+        : ["Mathematics"];
+
+      const session = await commands.startSession(
+        options.studentId,
+        subjects,
+        duration,
+      );
+
+      if (options.format === "json") {
         console.log(JSON.stringify(session, null, 2));
       } else {
         await commands.displaySessionInfo(session);
       }
     } catch (error) {
-      console.error('Error starting session:', error);
+      console.error("Error starting session:", error);
       process.exit(1);
     }
   }
@@ -576,27 +632,29 @@ Format your response as JSON:
         studentId: options.studentId,
         subject: options.subject,
         topic: options.topic,
-        contentType: options.type || 'lesson',
+        contentType: options.type || "lesson",
         difficulty: options.difficulty,
-        context: options.context
+        context: options.context,
       };
-      
+
       const content = await commands.generateContent(contentRequest);
-      
-      if (options.format === 'json') {
+
+      if (options.format === "json") {
         console.log(JSON.stringify(content, null, 2));
       } else {
         await commands.displayContent(content);
       }
     } catch (error) {
-      console.error('Error generating content:', error);
+      console.error("Error generating content:", error);
       process.exit(1);
     }
   }
 
   static async startChat(options: any): Promise<void> {
-    console.log('Interactive chat functionality not yet implemented');
-    console.log('This feature will provide real-time AI tutoring chat interface');
+    console.log("Interactive chat functionality not yet implemented");
+    console.log(
+      "This feature will provide real-time AI tutoring chat interface",
+    );
     console.log(`Would start chat for student: ${options.studentId}`);
     if (options.subject) {
       console.log(`Subject: ${options.subject}`);

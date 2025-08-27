@@ -1,0 +1,14 @@
+{
+  "studentId": "aman-negi-123",
+  "name": "Aman Negi",
+  "grade": "8", 
+  "subjects": ["Mathematics", "Science", "English"],
+  "board": "CBSE",
+  "school": "Delhi Public School",
+  "country": "India",
+  "learningPace": "medium",
+  "strengths": ["problem-solving", "logical reasoning"],
+  "challenges": ["complex word problems", "algebraic expressions"],
+  "preferredLearningStyle": "visual",
+  "notes": "Student who hasn't started any courses yet but shows 75% score - this is the test case for evaluation"
+}
