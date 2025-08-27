@@ -1,6 +1,6 @@
 {
   "name": "school-tutor-backend",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "AWS CDK backend for school tutor agent with Bedrock integration",
   "bin": {
     "school-tutor-backend": "bin/school-tutor-backend.js"
@@ -11,9 +11,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "cdk": "pnpm exec cdk doctor",
-    "deploy": "pnpm run build && pnpm exec cdk deploy SchoolTutorStack",
+    "deploy": "pnpm run build && pnpm exec cdk deploy CoreResourcesStack",
     "deploy:all": "pnpm run build && pnpm exec cdk deploy --all",
-    "deploy:dev": "pnpm run build && pnpm exec cdk deploy SchoolTutorStack",
+    "deploy:ai": "pnpm run build && pnpm exec cdk deploy AiServiceStack",
     "destroy": "pnpm exec cdk destroy --all",
     "synth": "pnpm exec cdk synth",
     "diff": "pnpm exec cdk diff",

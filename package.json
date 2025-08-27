@@ -1,25 +1,30 @@
 {
-  "name": "school-tutor-agent",
-  "version": "1.0.0",
-  "description": "AI-powered class tutor agent for 8th and 4th standard students with adaptive learning and progress tracking",
+  "name": "smart-school-tutor",
+  "version": "2.0.0",
+  "description": "AI-powered personalized education platform using AWS Bedrock and Claude AI for adaptive learning experiences",
   "main": "index.js",
   "scripts": {
     "build": "pnpm run clean && pnpm run build:backend && pnpm run build:frontend",
     "build:backend": "cd backend && pnpm run build",
     "build:frontend": "cd frontend && pnpm run build",
     "clean": "rm -rf dist/* && touch dist/.gitkeep",
-    "clean:backend": "rm -rf dist/backend",
-    "clean:frontend": "rm -rf dist/frontend",
-    "clean:evaluation": "rm -rf dist/evaluation",
+    "clean:all": "pnpm run clean && rm -rf node_modules backend/node_modules frontend/node_modules evaluation/node_modules",
     "deploy": "cd backend && pnpm run deploy",
+    "dev": "concurrently \"pnpm run start:backend\" \"pnpm run start:frontend\"",
     "start:backend": "cd backend && pnpm start",
     "start:frontend": "cd frontend && pnpm start",
-    "dev": "concurrently \"pnpm run start:backend\" \"pnpm run start:frontend\"",
     "test": "pnpm run test:backend && pnpm run test:frontend",
     "test:backend": "cd backend && pnpm test",
     "test:frontend": "cd frontend && pnpm test",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "format": "prettier --write ."
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "pnpm run type-check:backend && pnpm run type-check:frontend",
+    "type-check:backend": "cd backend && pnpm run type-check",
+    "type-check:frontend": "cd frontend && pnpm run type-check",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "release": "pnpm run build && pnpm changeset:publish"
   },
   "keywords": [
     "ai-tutor",
@@ -27,16 +32,37 @@
     "aws",
     "education",
     "adaptive-learning",
-    "progress-tracking"
+    "progress-tracking",
+    "claude-ai",
+    "personalized-education",
+    "edtech",
+    "curriculum-aligned"
   ],
-  "author": "Pankaj Negi",
+  "author": {
+    "name": "Pankaj Negi",
+    "email": "pankaj@example.com",
+    "url": "https://github.com/pankajads"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pankajads/school-tutor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pankajads/school-tutor/issues"
+  },
+  "homepage": "https://github.com/pankajads/school-tutor#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "devDependencies": {
+    "@changesets/cli": "^2.29.6",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0"
+    "prettier": "^3.6.2",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0"
   },
   "workspaces": [
     "backend",

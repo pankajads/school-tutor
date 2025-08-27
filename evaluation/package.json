@@ -1,43 +1,43 @@
 {
-  "name": "school-tutor-evaluation",
-  "version": "1.0.0",
-  "description": "Comprehensive evaluation framework for School Tutor Agent using Ragas, DeepEval, TruLens, and custom metrics",
-  "main": "index.js",
+  "name": "school-tutor-ai-judge-evaluation",
+  "version": "3.0.0",
+  "description": "AI Judge Evaluation System - Objective AI quality assessment using GPT-4 as judge",
+  "main": "dist/ai-judge-evaluator.js",
+  "type": "module",
   "scripts": {
-    "install:all": "pnpm install && pip install -r requirements.txt",
-    "eval:ragas": "python frameworks/ragas/evaluate.py",
-    "eval:deepeval": "python frameworks/deepeval/evaluate.py", 
-    "eval:trulens": "python frameworks/trulens/evaluate.py",
-    "eval:custom": "python frameworks/custom/evaluate.py",
-    "eval:all": "pnpm run eval:ragas && pnpm run eval:deepeval && pnpm run eval:trulens && pnpm run eval:custom",
-    "dashboard": "python dashboard/app.py",
-    "report": "python scripts/generate_report.py --output ../dist/evaluation/reports",
-    "benchmark": "python scripts/benchmark.py --output ../dist/evaluation/benchmarks",
-    "test": "python -m pytest tests/",
-    "lint": "black . && flake8 .",
-    "type-check": "mypy ."
+    "build": "tsc",
+    "dev": "tsx src/run-evaluation.ts",
+    "start": "node dist/run-evaluation.js",
+    "evaluate": "pnpm build && node dist/run-evaluation.js",
+    "eval:math": "pnpm build && node dist/run-evaluation.js --subject mathematics --grade 8 --tests 5",
+    "eval:science": "pnpm build && node dist/run-evaluation.js --subject science --grade 8 --tests 3",
+    "eval:full": "pnpm build && node dist/run-evaluation.js --full-suite",
+    "eval:aman": "pnpm build && node dist/run-evaluation.js --student-profile ./profiles/aman-negi.json --tests 5 --verbose",
+    "test": "pnpm build && node dist/test-evaluation.js",
+    "test:dev": "tsx src/test-evaluation.ts",
+    "help": "pnpm build && node dist/run-evaluation.js --help",
+    "clean": "rm -rf dist"
   },
   "keywords": [
-    "evaluation",
-    "llm",
-    "ragas",
-    "deepeval",
-    "trulens",
-    "ai-tutor",
-    "education"
+    "ai-evaluation",
+    "ai-judge",
+    "llm-quality",
+    "openai-gpt4",
+    "educational-ai",
+    "tutor-evaluation",
+    "objective-assessment"
   ],
   "author": "Pankaj Negi",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.6.2",
-    "express": "^4.18.2",
-    "lodash": "^4.17.21",
-    "moment": "^2.29.4"
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.6",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "tsx": "^4.6.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

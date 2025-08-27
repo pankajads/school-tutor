@@ -1,0 +1,21 @@
+{
+  "name": "curriculum-lambda",
+  "version": "1.0.0",
+  "description": "AI-powered curriculum generation Lambda function",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.400.0"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "curriculum",
+    "ai",
+    "bedrock"
+  ],
+  "author": "Pankaj Negi",
+  "license": "MIT"
+}

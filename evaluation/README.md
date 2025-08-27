@@ -1,34 +1,25 @@
-# School Tutor Evaluation Framework
+# AI Judge Evaluation System (Backend API Integration)
 
-A comprehensive evaluation system for the School Tutor Agent using modern LLM evaluation frameworks and custom educational metrics.
+A comprehensive AI quality assessment system that uses your backend API with AWS Bedrock Foundation Model (AWS Nitro Lite) as an independent AI judge.
 
-## 🎯 Overview
+## Overview
 
-This evaluation framework provides comprehensive assessment of the AI tutoring system across multiple dimensions:
+This system provides objective evaluation of AI tutor responses by:
+1. Sending test questions to the AI tutor
+2. Receiving AI responses
+3. Using AWS Bedrock (via your backend API) as an independent AI judge
+4. Providing detailed scoring and feedback
 
-### Evaluation Frameworks
-- **Ragas**: RAG evaluation framework for retrieval-augmented generation
-- **DeepEval**: LLM evaluation metrics for various aspects of model performance
-- **TruLens**: Evaluation and monitoring for LLM applications
-- **Custom Metrics**: Education-specific evaluation criteria
-
-### Key Metrics
-- **Model Quality**: Accuracy, factuality, hallucination detection
-- **Educational Effectiveness**: Learning outcomes, curriculum compliance
-- **Student Engagement**: Interaction quality, retention rates
-- **System Performance**: Latency, cost, scalability
-- **Business KPIs**: Satisfaction, completion rates, ROI
-
-## 🏗️ Architecture
+## Architecture
 
 ```
-evaluation/
-├── frameworks/              # Evaluation framework implementations
-│   ├── ragas/              # RAG evaluation
-│   ├── deepeval/           # Model evaluation
-│   ├── trulens/            # Monitoring and evaluation
-│   └── custom/             # Educational metrics
-├── dashboard/              # Real-time evaluation dashboard
+[Test Question] → [AI Tutor] → [AI Response] → [Backend API + AWS Bedrock] → [Evaluation Score]
+```
+
+- **AI Tutor**: Your existing tutor API endpoint
+- **Backend API**: Your backend service that interfaces with AWS Bedrock
+- **AWS Bedrock**: Foundation model (AWS Nitro Lite) for objective evaluation
+- **Evaluation System**: This TypeScript application
 ├── scripts/                # Automation and reporting scripts
 ├── tests/                  # Test suite
 ├── config/                 # Configuration files
