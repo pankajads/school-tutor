@@ -12,8 +12,8 @@
  * - Structured logging for debugging
  */
 
-// Environment configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://0mcvthborg.execute-api.ap-southeast-1.amazonaws.com/prod';
+// Environment configuration - Use Next.js API routes instead of direct backend calls
+const API_BASE_URL = '/api'; // Use Next.js API routes
 
 // Logging configuration
 type LogLevel = 'none' | 'error' | 'info' | 'debug';

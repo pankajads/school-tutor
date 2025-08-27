@@ -105,10 +105,17 @@ export default function StudentsPage() {
     try {
       setLoading(true);
       setError(null);
+      console.log('loadStudents: Starting to fetch students...');
       const studentsData = await apiService.getStudents();
       console.log('Students data received:', studentsData);
+      console.log('Students data type:', typeof studentsData);
+      console.log('Is array?', Array.isArray(studentsData));
+      console.log('Length:', studentsData?.length);
+      
       // Ensure we always have an array
-      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      const studentsArray = Array.isArray(studentsData) ? studentsData : [];
+      console.log('Setting students array:', studentsArray);
+      setStudents(studentsArray);
     } catch (error) {
       console.error('Error loading students:', error);
       setError('Failed to load students. Please try again.');
@@ -406,7 +413,7 @@ export default function StudentsPage() {
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow>
+              <TableRow key="header">
                 <TableCell>Student</TableCell>
                 <TableCell>Grade</TableCell>
                 <TableCell>Subjects</TableCell>
