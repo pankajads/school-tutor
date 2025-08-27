@@ -10,8 +10,6 @@
 
 ---
 
-## 📱 **Social Media Summary**
-
 **🚀 Introducing Smart School Tutor** - The future of personalized education is here! Our AI-powered platform uses AWS Bedrock and Claude AI to create adaptive learning experiences for students worldwide. From curriculum-compliant content to real-time progress tracking, we're revolutionizing how students learn and teachers teach. Join thousands of educators embracing AI-driven education! #EdTech #AI #PersonalizedLearning #Education #AWS #ClaudeAI
 
 ---
