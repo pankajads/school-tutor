@@ -871,14 +871,6 @@ chore: maintenance tasks
 - [Troubleshooting Guide](docs/troubleshooting.md)
 - [Privacy & Safety](docs/privacy-guide.md)
 
-### **🔗 Useful Links**
-
-- **Live Demo**: [https://demo.schooltutor.ai](https://demo.schooltutor.ai)
-- **Documentation**: [https://docs.schooltutor.ai](https://docs.schooltutor.ai)
-- **Community Forum**: [https://community.schooltutor.ai](https://community.schooltutor.ai)
-- **Support**: [support@schooltutor.ai](mailto:support@schooltutor.ai)
-- **Blog**: [https://blog.schooltutor.ai](https://blog.schooltutor.ai)
-
 ---
 
 ## 📄 **License & Legal**
@@ -935,9 +927,7 @@ We take student privacy seriously:
 
 #### **Technical Support**
 - **GitHub Issues**: [Report bugs and feature requests](https://github.com/pankajads/school-tutor/issues)
-- **Email Support**: [technical@schooltutor.ai](mailto:technical@schooltutor.ai)
-- **Documentation**: [Comprehensive guides and tutorials](https://docs.schooltutor.ai)
-- **FAQ**: [Common questions and solutions](https://faq.schooltutor.ai)
+
 
 #### **Educational Support**
 - **Teacher Training**: Free webinars and training sessions
@@ -945,21 +935,10 @@ We take student privacy seriously:
 - **Best Practices**: Guides for effective AI tutoring
 - **Success Stories**: Learn from other educators
 
-#### **Community**
-- **Discord Server**: [Join our developer community](https://discord.gg/schooltutor)
-- **LinkedIn Group**: [Professional educator network](https://linkedin.com/groups/schooltutor)
-- **Twitter**: [@SchoolTutorAI](https://twitter.com/schooltutorai)
-- **YouTube**: [Video tutorials and demos](https://youtube.com/schooltutorai)
-
 ### **🌟 Acknowledgments**
 
-We thank our amazing community:
+We are looking forward to build strong community:
 
-- **Educational Advisors**: Dr. Sarah Johnson (Stanford), Prof. Michael Chen (MIT)
-- **Beta Testers**: 50+ schools across 12 countries
-- **Open Source Contributors**: 25+ developers from around the world
-- **Research Partners**: Educational institutions providing valuable feedback
-- **Students & Teachers**: The heart of our platform who make it all worthwhile
 
 ---
 
